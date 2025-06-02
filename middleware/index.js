@@ -1,5 +1,7 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const multer = require('./multer.js')
+
 require('dotenv').config()
 
 
@@ -75,5 +77,6 @@ module.exports = {
   comparePassword,
   createToken,
   stripToken,
-  verifyToken
+  verifyToken,
+  multer
 }
