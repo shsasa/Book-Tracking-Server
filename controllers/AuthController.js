@@ -10,7 +10,9 @@ const Register = async (req, res) => {
     // Checks if there has already been a user registered with that email
     let existingUser = await User.findOne({ email })
     if (existingUser) {
-      return res.status(400).send('A user with that email has already been registered!')
+      return res
+        .status(400)
+        .send('A user with that email has already been registered!')
     } else {
       // Creates a new user
       const user = await User.create({ name, email, passwordDigest })
@@ -46,7 +48,9 @@ const Login = async (req, res) => {
     res.status(401).send({ status: 'Error', msg: 'Unauthorized' })
   } catch (error) {
     console.log(error)
-    res.status(401).send({ status: 'Error', msg: 'An error has occurred logging in!' })
+    res
+      .status(401)
+      .send({ status: 'Error', msg: 'An error has occurred logging in!' })
   }
 }
 
@@ -71,9 +75,13 @@ const UpdatePassword = async (req, res) => {
         id: user.id,
         email: user.email
       }
-      return res.status(200).send({ status: 'Password Updated!', user: payload })
+      return res
+        .status(200)
+        .send({ status: 'Password Updated!', user: payload })
     }
-    res.status(401).send({ status: 'Error', msg: 'Old Password did not match!' })
+    res
+      .status(401)
+      .send({ status: 'Error', msg: 'Old Password did not match!' })
   } catch (error) {
     console.log(error)
     res.status(401).send({
