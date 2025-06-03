@@ -18,8 +18,10 @@ bookSchema.statics.findOrCreate = async function ({ apiId, title, poster_path, a
   } else {
     return await this.create({ apiId, title, poster_path, author, year });
   }
+
 };
 
 const Book = mongoose.model('Book', bookSchema);
 
-module.exports = Book;
+module.exports = bookSchema
+

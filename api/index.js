@@ -1,6 +1,6 @@
 const express = require('express');
 const axios = require('axios');
-const Book = require('../models/Book'); // Assuming you have a Book model defined
+const { Book } = require('../models'); // Assuming you have a Book model defined
 
 // Base URL for Gutendex API
 const GUTENDEX_BASE_URL = 'https://gutendex.com/books';
@@ -27,7 +27,6 @@ const getBookById = async (req, res) => {
     if (response.status !== 200) {
       throw new Error('Book not found');
     }
-    console.log(`Book data: ${JSON.stringify(response.data)}`);
     const apiId = response.data['id'];
     const title = response.data['title']
     const poster_path = response.data['formats']['image/jpeg'] || ['image/png'] || ['image/gif'] || null;
@@ -35,6 +34,7 @@ const getBookById = async (req, res) => {
     let book = await Book.findOrCreate({
       apiId: apiId,
       title: title,
+      poster_path: poster_path
     }
     )
     await book.save()
