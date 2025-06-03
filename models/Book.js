@@ -32,7 +32,6 @@ bookSchema.statics.findOrCreate = async function ({ apiId, title, poster_path })
 
 
 
-const Book = mongoose.model('Book', bookSchema)
 
 
-module.exports = Book
+module.exports = bookSchema

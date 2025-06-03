@@ -15,7 +15,13 @@ const Register = async (req, res) => {
       // Creates a new user
       const user = await User.create({ name, email, passwordDigest })
       // Sends the user as a response
-      res.status(200).send(user)
+      const userData = {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      }
+      res.status(200).send(userData)
     }
   } catch (error) {
     throw error
@@ -37,11 +43,21 @@ const Login = async (req, res) => {
     if (matched) {
       let payload = {
         id: user.id,
-        email: user.email
+        email: user.email,
+        name: user.name,
+        role: user.role,
       }
+
+      const userData = {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      }
+
       // Creates our JWT and packages it with our payload to send as a response
       let token = middleware.createToken(payload)
-      return res.status(200).send({ user: payload, token })
+      return res.status(200).send({ user: userData, token })
     }
     res.status(401).send({ status: 'Error', msg: 'Unauthorized' })
   } catch (error) {
@@ -69,7 +85,9 @@ const UpdatePassword = async (req, res) => {
       })
       let payload = {
         id: user.id,
-        email: user.email
+        email: user.email,
+        name: user.name,
+        role: user.role,
       }
       return res.status(200).send({ status: 'Password Updated!', user: payload })
     }
@@ -85,6 +103,8 @@ const UpdatePassword = async (req, res) => {
 
 const CheckSession = async (req, res) => {
   const { payload } = res.locals
+
+
   res.status(200).send(payload)
 }
 
