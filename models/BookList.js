@@ -2,13 +2,13 @@ const { Schema } = require('mongoose')
 
 const bookListSchema = new Schema(
   {
-    name: { required: true },
-    user: { required: true },
+    name: { type: String, required: true },
+    user: { type: String, required: true },
     books: [
       {
-        apiId: { required: true },
-        title: { required: true },
-        poster_path: {}
+        apiId: { type: String, required: true },
+        title: { type: String, required: true },
+        poster_path: { type: String }
       }
     ]
   },
