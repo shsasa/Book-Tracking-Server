@@ -1,7 +1,7 @@
 const { Schema } = require('mongoose')
 const GenreSchema = new Schema(
   {
-    name: { required: true },
+    name: { type: String, required: true },
     details: {}
   },
   { timestamp: true }
