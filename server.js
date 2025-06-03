@@ -4,7 +4,7 @@ const logger = require('morgan')
 const cors = require('cors')
 require('dotenv').config()
 
-const { UserRouter, AuthRouter } = require('./routes')
+const { UserRouter, AuthRouter,BookRouter } = require('./routes')
 
 
 const PORT = process.env.PORT || 3001
@@ -20,6 +20,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 app.use('/auth', AuthRouter)
 app.use('/user', UserRouter)
+app.use('/book', BookRouter)
 
 
 app.use('/', (req, res) => {
