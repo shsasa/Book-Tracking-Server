@@ -1,12 +1,11 @@
 const { Schema } = mongoose
 
-const bookCommentSchema = new Schema(
+const bookFavoriteSchema = new Schema(
   {
-    comment: { type: String, required: true },
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     book: { type: mongoose.Schema.Types.ObjectId, ref: 'Book', required: true }
   },
   { timestamps: true }
 )
 
-module.exports = bookCommentSchema
+module.exports = bookFavoriteSchema
