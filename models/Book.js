@@ -1,11 +1,17 @@
 const mongoose = require('mongoose');
-
 const bookSchema = new mongoose.Schema({
   title: { type: String, required: true },
   apiId: { type: String, unique: true, required: true },
   poster_path: { type: String },
-  author: { type: String },
-  year: { type: String }
+  authors: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Author' }],
+  year: { type: String },
+  blocked: {
+    blocked: { type: Boolean, default: false },
+    reason: { type: String, default: '' },
+    blockedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+  }
+
+
 }, {
   timestamps: true
 });
@@ -21,7 +27,6 @@ bookSchema.statics.findOrCreate = async function ({ apiId, title, poster_path, a
 
 };
 
-const Book = mongoose.model('Book', bookSchema);
 
 module.exports = bookSchema
 
