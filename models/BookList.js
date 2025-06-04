@@ -11,10 +11,10 @@ const bookListSchema = new Schema(
         title: { type: String, required: true },
         poster_path: { type: String }
       }
-    ],
+    ]
     // blockedBy: [{ type: Schema.Types.ObjectId, ref: 'User' }]
 
-    private: { type: Boolean, default: false }
+    // private: { type: Boolean, default: false }
   },
   { timestamps: true }
 )
