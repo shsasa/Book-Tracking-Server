@@ -17,7 +17,7 @@ const bookRatingSchema = new Schema(
   },
   { timestamps: true }
 )
-
+//Reference:(https://stackoverflow.com/questions/38165736/prevent-duplicate-entries-in-array-in-mongoose-schema)
 bookRatingSchema.index({ user: 1, book: 1 }, { unique: true })
 
 module.exports = bookRatingSchema
