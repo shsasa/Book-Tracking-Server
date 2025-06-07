@@ -30,4 +30,15 @@ const userBannedBook = async (req, res) => {
   }
 }
 
-module.export = { addBannedBook, userBannedBook }
+const deleteBannedBook = async (req, res) => {
+  try {
+    const { id } = req.params
+    const deletedBook = await BannedBooks.findByIdAndDelete(id)
+    if (!deletedBook) return res.status(404).send('not found!')
+
+    res.status(200).send(`successfully removed for user: ${deletedBook.user}`)
+  } catch (error) {
+    res.status(500).send(`Error: ${error.message}`)
+  }
+}
+module.export = { addBannedBook, userBannedBook, deleteBannedBook }
