@@ -1,7 +1,7 @@
-const router = require('express').Router()
-const { BookController } = require('../controllers')
-const api = require('../api')
 
+const router = require('express').Router();
+const { BookController } = require('../controllers');
+const api = require('../api');
 
 router.get('/', BookController.getAllBooks)
 router.get('/search/:search', api.searchBooks) // Search books using Gutendex API

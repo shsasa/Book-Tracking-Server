@@ -1,8 +1,9 @@
-const router = require('express').Router();
+// controllers/BookController.js
 const { Book } = require('../models');
 const fs = require('fs');
 const path = require('path');
 const fetch = require('node-fetch'); 
+
 
 
 
@@ -44,9 +45,25 @@ const getBookUrl = async (req, res) => {
 module.exports = {
   getAllBooks,
   getBookUrl
+
 };
 
+const updateRating = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rating } = req.body;
+    const book = await Book.findByIdAndUpdate(id, { rating }, { new: true });
+    if (!book) {
+      return res.status(404).send({ status: 'Error', msg: 'Book not found' });
+    }
+    res.status(200).send(book);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ status: 'Error', msg: 'Failed to update rating.' });
+  }
+};
 
-
-
-
+module.exports = {
+  getAllBooks,
+  updateRating,
+};
