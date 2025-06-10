@@ -22,9 +22,13 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.15.1",
+
+    "mongodb": "^6.16.0",
+    "mongoose": "^8.9.2",
+
     "morgan": "^1.10.0",
-    "multer": "^2.0.0"
+    "multer": "^2.0.0",
+    "react-reader": "^2.0.13"
   },
   "bugs": {
     "url": "https://github.com/shsasa/Book-Tracking-Server/issues"

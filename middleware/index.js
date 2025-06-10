@@ -70,6 +70,14 @@ const verifyToken = (req, res, next) => {
   }
 }
 
+const isAdmin = (req, res, next) => {
+  const { payload } = res.locals
+  if (payload.role === 'admin') {
+    return next()
+  }
+  res.status(403).send({ status: 'Error', msg: 'Forbidden' })
+}
+
 
 
 module.exports = {
@@ -78,5 +86,6 @@ module.exports = {
   createToken,
   stripToken,
   verifyToken,
-  multer
+  multer,
+  isAdmin
 }
