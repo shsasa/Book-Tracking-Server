@@ -15,7 +15,7 @@ router.post('/:id/comment', stripToken, verifyToken, BookController.postComment)
 router.post('/read', stripToken, verifyToken, BookController.addBookToReadList);
 router.put('/read/:bookId', stripToken, verifyToken, BookController.updateReadBook);
 router.delete('/read/:bookId', stripToken, verifyToken, BookController.removeBookFromReadList);
-
+router.get('/read/user', stripToken, verifyToken, BookController.getUserReadList);
 router.get('/:id', api.getBookById);
 router.get('/', BookController.getAllBooks);
 module.exports = router

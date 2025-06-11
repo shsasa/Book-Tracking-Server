@@ -1,6 +1,6 @@
 const express = require('express');
 const axios = require('axios');
-const { Book, Author, BookFavorite, BookComment } = require('../models');
+const { Book, Author, BookFavorite, BookComment, ReadBook } = require('../models');
 const jwt = require('jsonwebtoken');
 const APP_SECRET = process.env.APP_SECRET || 'secret';
 
@@ -60,6 +60,7 @@ const getBookById = async (req, res) => {
     });
 
     let isFavorite = false;
+    let isInReadList = false
     let comments = [];
     const authHeader = req.headers['authorization'];
     if (authHeader) {
@@ -70,14 +71,22 @@ const getBookById = async (req, res) => {
         if (userId) {
           const favorite = await BookFavorite.findOne({ user: userId, book: book._id });
           isFavorite = !!favorite;
+
+          const readBook = await ReadBook.findOne({ user: userId, book: book._id });
+          isInReadList = !!readBook;
         }
 
         // Fetch comments for the book
 
       } catch (err) {
         isFavorite = false;
+
+        isInReadList = false;
+
       }
     }
+
+
 
     try {
 
@@ -100,7 +109,7 @@ const getBookById = async (req, res) => {
       comments = [];
     }
 
-    res.send({ ...data, isFavorite, comments });
+    res.send({ ...data, isFavorite, comments, isInReadList });
   } catch (error) {
     console.error('Fetch book error:', error.message);
     res.status(500).json({ error: 'Failed to fetch book from Gutendex.' });
