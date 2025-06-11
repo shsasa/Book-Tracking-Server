@@ -1,4 +1,4 @@
-const { Schema } = mongoose
+const mongoose = require('mongoose');
 
 const bookRatingSchema = new Schema(
   {
