@@ -1,8 +1,8 @@
 const BookFavorite = require('../models/bookFavorite')
 
-const addFavorite = async (user, book) => {
+const addFavorite = async ( book) => {
   try {
-    const newFavorite = new BookFavorite({ user, book })
+    const newFavorite = new BookFavorite({  book })
     await newFavorite.save()
   } catch (error) {
     console.error(error)
@@ -17,15 +17,8 @@ const getFavorites = async () => {
   }
 }
 
-const getFavoriteById = async (id) => {
-  try {
-    return await BookFavorite.findById(id).populate('user').populate('book')
-  } catch (error) {
-    console.error(error)
-  }
-}
 
-const removeFavorite = async (id) => {
+const removeFavorite = async (bookID) => {
   try {
     await BookFavorite.findByIdAndDelete(id)
   } catch (error) {

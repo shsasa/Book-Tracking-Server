@@ -1,5 +1,5 @@
 // controllers/BookController.js
-const { Book, BookRating, User } = require('../models');
+const { Book, BookRating, User, BookFavorite } = require('../models');
 const fs = require('fs');
 const path = require('path');
 const fetch = require('node-fetch');
@@ -110,9 +110,85 @@ const checkUserRating = async (req, res) => {
   }
 };
 
+const getUserRatedBooks = async (req, res) => {
+  try {
+    const userId = res.locals.payload?.id || res.locals.payload?._id;
+    if (!userId) {
+      return res.status(401).send({ status: 'Error', msg: 'User not authorized.' });
+    }
+
+    const ratings = await BookRating.find({ user: userId }).populate('book');
+    const books = ratings.map(rating => rating.book);
+
+    res.status(200).send({ status: 'Success', books });
+  } catch (error) {
+    console.error('Get user rated books error:', error);
+    res.status(500).send({ status: 'Error', msg: 'Failed to get user rated books.' });
+  }
+};
+
+
+
+const addOrRemoveBookFromFavorites = async (req, res) => {
+  try {
+    const bookId = req.params.id;
+    const userId = res.locals.payload?.id || res.locals.payload?._id;
+
+    if (!bookId || !userId) {
+      return res.status(400).send({ status: 'Error', msg: 'Book ID and user ID are required.' });
+    }
+
+    const book = await Book.findOne({ apiId: bookId });
+    if (!book) {
+      return res.status(404).send({ status: 'Error', msg: 'Book not found.' });
+    }
+
+    const existingFavorite = await BookFavorite.findOne({ book: book._id, user: userId });
+
+    if (existingFavorite) {
+      await BookFavorite.deleteOne({ _id: existingFavorite._id });
+      return res.status(200).send({ status: 'Success', msg: 'Book removed from favorites.' });
+    } else {
+      const newFavorite = new BookFavorite({ book: book._id, user: userId });
+      await newFavorite.save();
+      return res.status(200).send({ status: 'Success', msg: 'Book added to favorites.' });
+    }
+  } catch (error) {
+    console.error('Add/Remove book from favorites error:', error);
+    res.status(500).send({ status: 'Error', msg: 'Failed to add/remove book from favorites.' });
+  }
+};
+
+const getListOfFavoritesBooks = async (req, res) => {
+  try {
+    const userId = res.locals.payload?.id || res.locals.payload?._id;
+    console.log('User ID:', userId);
+    if (!userId) {
+      return res.status(401).send({ status: 'Error', msg: 'User not authorized.' });
+    }
+
+    const favorites = await BookFavorite.find({ user: userId }).populate('book');
+
+    console.log('Favorites:', favorites);
+    const books = favorites.map(fav => fav.book);
+
+
+
+    res.status(200).send({ status: 'Success', books });
+  } catch (error) {
+    console.error('Get list of favorite books error:', error);
+    res.status(500).send({ status: 'Error', msg: 'Failed to get list of favorite books.' });
+  }
+};
+
+
 module.exports = {
   getAllBooks,
   updateRating,
   getBookUrl,
-  checkUserRating
+  checkUserRating,
+  getUserRatedBooks,
+  addOrRemoveBookFromFavorites,
+  getListOfFavoritesBooks
+
 };

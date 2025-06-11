@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const bookFavoriteSchema = new Schema(
+const bookFavoriteSchema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     book: { type: mongoose.Schema.Types.ObjectId, ref: 'Book' }
@@ -8,4 +8,4 @@ const bookFavoriteSchema = new Schema(
   { timestamps: true }
 )
 
-module.exports = bookFavoriteSchema
+module.exports = mongoose.model('BookFavorite', bookFavoriteSchema);

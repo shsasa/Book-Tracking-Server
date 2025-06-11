@@ -66,7 +66,9 @@ const Login = async (req, res) => {
 const UpdatePassword = async (req, res) => {
   try {
     const { oldPassword, newPassword } = req.body
-    let user = await User.findById(req.params.user_id)
+    const userId = res.locals.payload?.id || res.locals.payload?._id;
+
+    let user = await User.findById(userId)
     let matched = await middleware.comparePassword(
       oldPassword,
       user.passwordDigest
@@ -74,7 +76,7 @@ const UpdatePassword = async (req, res) => {
     if (matched) {
       let passwordDigest = await middleware.hashPassword(newPassword)
       user = await User.findByIdAndUpdate(
-        req.params.user_id,
+        user._id,
         { passwordDigest },
         { new: true }
       )
