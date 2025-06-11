@@ -1,13 +1,21 @@
-const { Schema } = mongoose
+const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
 const readBookSchema = new Schema(
   {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    book: { type: mongoose.Schema.Types.ObjectId, ref: 'Book' }
+    user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    book: { type: Schema.Types.ObjectId, ref: 'Book', required: true },
+    status: {
+      type: String,
+      enum: ['not_started', 'reading', 'finished'],
+      default: 'not_started'
+    },
+    currentPage: {
+      type: Number,
+      default: null
+    }
   },
   { timestamps: true }
-)
-//Reference:(https://stackoverflow.com/questions/38165736/prevent-duplicate-entries-in-array-in-mongoose-schema)
-readBookSchema.index({ user: 1, book: 1 }, { unique: true })
+);
 
-module.exports = readBookSchema
+module.exports = mongoose.model('ReadBook', readBookSchema);

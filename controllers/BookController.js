@@ -1,9 +1,9 @@
 // controllers/BookController.js
-const { Book, BookRating, User, BookFavorite } = require('../models');
+const { Book, BookRating, User, BookFavorite, BookComment, ReadBook } = require('../models');
 const fs = require('fs');
 const path = require('path');
 const fetch = require('node-fetch');
-
+const isMongoId = (id) => /^[a-f\d]{24}$/i.test(id);
 
 
 
@@ -181,6 +181,168 @@ const getListOfFavoritesBooks = async (req, res) => {
   }
 };
 
+const postComment = async (req, res) => {
+  try {
+    const { bookId, comment } = req.body;
+    const userId = res.locals.payload?.id || res.locals.payload?._id;
+
+    if (!bookId || !comment || !userId
+      || !comment.trim()) {
+      return res.status(400).send({ status: 'Error', msg: 'Book ID, comment, and user ID are required.' });
+    }
+
+    const book = await Book.findOne({ apiId: bookId });
+    if (!book) {
+      return res.status(404).send({ status: 'Error', msg: 'Book not found.' });
+    }
+
+    const newComment = new BookComment({
+      book: book._id,
+      user: userId,
+      comment
+    });
+
+    await newComment.save();
+    res.status(201).send({ status: 'Success', msg: 'Comment added successfully.', comment: newComment });
+  } catch (error) {
+    console.error('Post comment error:', error);
+    res.status(500).send({ status: 'Error', msg: 'Failed to post comment.' });
+  }
+};
+
+
+const addBookToReadList = async (req, res) => {
+  try {
+    const userId = res.locals.payload?.id || res.locals.payload?._id;
+    const { bookId } = req.body;
+
+    if (!userId || !bookId) {
+      return res.status(400).send({ status: 'Error', msg: 'User ID and Book ID are required.' });
+    }
+
+    let book;
+    if (isMongoId(bookId)) {
+      book = await Book.findById(bookId);
+    } else {
+      book = await Book.findOne({ apiId: bookId });
+    }
+
+    if (!book) {
+      return res.status(404).send({ status: 'Error', msg: 'Book not found.' });
+    }
+
+    let readBook = await ReadBook.findOne({ user: userId, book: book._id });
+    if (readBook) {
+      return res.status(200).send({ status: 'Success', msg: 'Book already in your reading list.', readBook });
+    }
+
+    readBook = new ReadBook({
+      user: userId,
+      book: book._id,
+      status: 'not_started',
+      currentPage: null
+    });
+    await readBook.save();
+
+    res.status(201).send({ status: 'Success', msg: 'Book added to your reading list.', readBook });
+  } catch (error) {
+    console.error('Add book to read list error:', error);
+    res.status(500).send({ status: 'Error', msg: 'Failed to add book to reading list.' });
+  }
+};
+const updateReadBook = async (req, res) => {
+  try {
+    const userId = res.locals.payload?.id || res.locals.payload?._id;
+    const { bookId } = req.params;
+    const { status, currentPage } = req.body;
+
+    if (!userId || !bookId) {
+      return res.status(400).send({ status: 'Error', msg: 'User ID and Book ID are required.' });
+    }
+
+    let book;
+    if (isMongoId(bookId)) {
+      book = await Book.findById(bookId);
+    } else {
+      book = await Book.findOne({ apiId: bookId });
+    }
+
+    if (!book) {
+      return res.status(404).send({ status: 'Error', msg: 'Book not found.' });
+    }
+
+    let readBook = await ReadBook.findOne({ user: userId, book: book._id });
+    if (!readBook) {
+      return res.status(404).send({ status: 'Error', msg: 'Book not found in your reading list.' });
+    }
+
+    if (status) readBook.status = status;
+    if (typeof currentPage === 'number') readBook.currentPage = currentPage;
+
+    await readBook.save();
+
+    res.status(200).send({ status: 'Success', msg: 'Reading status updated.', readBook });
+  } catch (error) {
+    console.error('Update read book error:', error);
+    res.status(500).send({ status: 'Error', msg: 'Failed to update reading status.' });
+  }
+};
+const removeBookFromReadList = async (req, res) => {
+  try {
+    const userId = res.locals.payload?.id || res.locals.payload?._id;
+    const { bookId } = req.params;
+
+    if (!userId || !bookId) {
+      return res.status(400).send({ status: 'Error', msg: 'User ID and Book ID are required.' });
+    }
+
+    let book;
+    if (isMongoId(bookId)) {
+      book = await Book.findById(bookId);
+    } else {
+      book = await Book.findOne({ apiId: bookId });
+    }
+
+    if (!book) {
+      return res.status(404).send({ status: 'Error', msg: 'Book not found.' });
+    }
+
+    const deleted = await ReadBook.findOneAndDelete({ user: userId, book: book._id });
+    if (!deleted) {
+      return res.status(404).send({ status: 'Error', msg: 'Book not found in your reading list.' });
+    }
+
+    res.status(200).send({ status: 'Success', msg: 'Book removed from your reading list.' });
+  } catch (error) {
+    console.error('Remove book from read list error:', error);
+    res.status(500).send({ status: 'Error', msg: 'Failed to remove book from reading list.' });
+  }
+};
+
+const getUserReadList = async (req, res) => {
+  try {
+    const userId = res.locals.payload?.id || res.locals.payload?._id;
+    if (!userId) {
+      return res.status(401).send({ status: 'Error', msg: 'User not authorized.' });
+    }
+
+    const readBooks = await ReadBook.find({ user: userId }).populate('book');
+    const books = readBooks
+      .filter(entry => entry.book)
+      .map(entry => ({
+        ...entry.book.toObject(),
+        status: entry.status,
+        currentPage: entry.currentPage
+      }));
+
+    res.status(200).send({ status: 'Success', books });
+  } catch (error) {
+    console.error('Get user read list error:', error);
+    res.status(500).send({ status: 'Error', msg: 'Failed to get user read list.' });
+  }
+};
+
+
 
 module.exports = {
   getAllBooks,
@@ -189,6 +351,11 @@ module.exports = {
   checkUserRating,
   getUserRatedBooks,
   addOrRemoveBookFromFavorites,
-  getListOfFavoritesBooks
+  getListOfFavoritesBooks,
+  postComment,
+  addBookToReadList,
+  updateReadBook,
+  removeBookFromReadList,
+  getUserReadList
 
 };
