@@ -1,6 +1,8 @@
 const express = require('express');
 const axios = require('axios');
-const { Book, Author } = require('../models');
+const { Book, Author, BookFavorite } = require('../models');
+const jwt = require('jsonwebtoken');
+const APP_SECRET = process.env.APP_SECRET || 'secret';
 
 const GUTENDEX_BASE_URL = 'https://gutendex.com/books';
 
@@ -57,11 +59,26 @@ const getBookById = async (req, res) => {
       year
     });
 
-    res.send(data);
+    let isFavorite = false;
+    const authHeader = req.headers['authorization'];
+    if (authHeader) {
+      try {
+        const token = authHeader.split(' ')[1];
+        const payload = jwt.verify(token, APP_SECRET);
+        const userId = payload.id || payload._id;
+        if (userId) {
+          const favorite = await BookFavorite.findOne({ user: userId, book: book._id });
+          isFavorite = !!favorite;
+        }
+      } catch (err) {
+        isFavorite = false;
+      }
+    }
+
+    res.send({ ...data, isFavorite });
   } catch (error) {
     console.error('Fetch book error:', error.message);
     res.status(500).json({ error: 'Failed to fetch book from Gutendex.' });
   }
 };
-
 module.exports = { searchBooks, getBookById };
