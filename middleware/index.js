@@ -36,21 +36,21 @@ const createToken = (payload) => {
 
 const stripToken = (req, res, next) => {
   try {
-    const token = req.headers['authorization'].split(' ')[1]
-    // Gets the token from the request headers {authorization: Bearer Some-Token}
-    // Splits the value of the authorization header
-    if (token) {
-      res.locals.token = token
-      // If the token exists we add it to the request lifecycle state
-      return next()
+    const authHeader = req.headers['authorization'];
+    if (!authHeader) {
+      return res.status(401).json({ msg: 'No authorization header provided' });
     }
-    res.status(401).send({ status: 'Error', msg: 'Unauthorized' })
+    const token = authHeader.split(' ')[1];
+    if (token) {
+      res.locals.token = token;
+      return next();
+    } else {
+      return res.status(401).json({ msg: 'Malformed authorization header' });
+    }
   } catch (error) {
-    console.log(error)
-    res.status(401).send({ status: 'Error', msg: 'Strip Token Error!' })
+    return res.status(401).json({ msg: 'Invalid token' });
   }
-}
-
+};
 
 const verifyToken = (req, res, next) => {
   const { token } = res.locals
