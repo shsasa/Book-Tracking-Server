@@ -1,6 +1,6 @@
 const express = require('express');
 const axios = require('axios');
-const { Book, Author, BookFavorite } = require('../models');
+const { Book, Author, BookFavorite, BookComment } = require('../models');
 const jwt = require('jsonwebtoken');
 const APP_SECRET = process.env.APP_SECRET || 'secret';
 
@@ -60,6 +60,7 @@ const getBookById = async (req, res) => {
     });
 
     let isFavorite = false;
+    let comments = [];
     const authHeader = req.headers['authorization'];
     if (authHeader) {
       try {
@@ -70,12 +71,36 @@ const getBookById = async (req, res) => {
           const favorite = await BookFavorite.findOne({ user: userId, book: book._id });
           isFavorite = !!favorite;
         }
+
+        // Fetch comments for the book
+
       } catch (err) {
         isFavorite = false;
       }
     }
 
-    res.send({ ...data, isFavorite });
+    try {
+
+
+      comments = await BookComment.find({ book: book._id }).populate('user');
+
+      comments = comments
+        .filter(comment => comment.user)
+        .map(comment => ({
+          id: comment._id,
+          comment: comment.comment,
+          user: {
+            id: comment.user._id,
+            name: comment.user.name
+          },
+          createdAt: comment.createdAt
+        }));
+      console.log('Comments:', comments);
+    } catch (err) {
+      comments = [];
+    }
+
+    res.send({ ...data, isFavorite, comments });
   } catch (error) {
     console.error('Fetch book error:', error.message);
     res.status(500).json({ error: 'Failed to fetch book from Gutendex.' });
