@@ -2,7 +2,7 @@
 const { Book } = require('../models');
 const fs = require('fs');
 const path = require('path');
-const fetch = require('node-fetch'); 
+const fetch = require('node-fetch');
 
 
 
@@ -33,20 +33,15 @@ const getBookUrl = async (req, res) => {
     if (!response.ok) throw new Error('Failed to fetch file');
 
     const buffer = await response.buffer();
-    fs.writeFileSync(savePath, buffer); 
+    fs.writeFileSync(savePath, buffer);
 
-    res.json({ url: `/epubs/${fileName}` }); 
+    res.json({ url: `/epubs/${fileName}` });
   } catch (err) {
     console.error('Book download error:', err.message);
     res.status(500).json({ error: 'Failed to download and save EPUB file' });
   }
 };
 
-module.exports = {
-  getAllBooks,
-  getBookUrl
-
-};
 
 const updateRating = async (req, res) => {
   try {
@@ -66,4 +61,5 @@ const updateRating = async (req, res) => {
 module.exports = {
   getAllBooks,
   updateRating,
+  getBookUrl
 };
